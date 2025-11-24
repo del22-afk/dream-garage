@@ -1,11 +1,35 @@
 import { PrismaClient } from '@prisma/client';
+import path from 'path';
 
-const globalForPrisma = global as unknown as { prisma: PrismaClient };
+// Mencegah multiple instance saat hot-reloading di development
+declare global {
+    // eslint-disable-next-line no-var
+    var cachedPrisma: PrismaClient | undefined;
+}
 
-export const prisma =
-    globalForPrisma.prisma ||
-    new PrismaClient({
-        log: ['query'],
-    });
+// Workaround untuk menemukan file db di production (Vercel/Render)
+// PENTING: Saya sudah ubah 'local.db' menjadi 'dev.db' sesuai punya kamu
+const filePath = path.join(process.cwd(), 'prisma/dev.db');
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+const config = {
+    datasources: {
+        db: {
+            url: 'file:' + filePath,
+        },
+    },
+};
+
+let prismaInstance: PrismaClient;
+
+if (process.env.NODE_ENV === 'production') {
+    prismaInstance = new PrismaClient(config);
+} else {
+    if (!global.cachedPrisma) {
+        global.cachedPrisma = new PrismaClient(config);
+    }
+    prismaInstance = global.cachedPrisma;
+}
+
+// PENTING: Kita export dengan nama 'prisma' (bukan 'db') 
+// agar file-file API route kamu yang lain tidak error.
+export const prisma = prismaInstance;
