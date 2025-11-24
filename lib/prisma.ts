@@ -8,7 +8,6 @@ declare global {
 }
 
 // Workaround untuk menemukan file db di production (Vercel/Render)
-// PENTING: Saya sudah ubah 'local.db' menjadi 'dev.db' sesuai punya kamu
 const filePath = path.join(process.cwd(), 'prisma/dev.db');
 
 const config = {
