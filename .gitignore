@@ -41,5 +41,5 @@ yarn-error.log*
 next-env.d.ts
 
 # Prisma & SQLite Database (TAMBAHAN PENTING)
-/prisma/*.db
+#/prisma/*.db
 /prisma/*.db-journal
